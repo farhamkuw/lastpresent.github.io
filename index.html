@@ -142,6 +142,8 @@
             display: flex;
             flex-direction: column;
             padding: 20px;
+            /* FIX: Ensure the container can shrink if content overflows */
+            min-height: 0;
         }
         .modal-header {
             display: flex;
@@ -278,6 +280,17 @@
                 width: 95%;
                 height: 90vh;
             }
+            
+            /* FIX: Allow the media and info sections to have flexible height */
+            .modal-media {
+                flex: 1;
+                min-height: 0; /* Important for flex items */
+            }
+            .modal-info {
+                flex: 1;
+                min-height: 0; /* Important for flex items */
+                padding: 10px; /* Adjust padding for smaller screens */
+            }
         }
     </style>
 </head>
@@ -356,39 +369,21 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-        /* === BAGIAN CAPTION YANG DIPERBARUI SESUAI PERMINTAAN ANDA === */
-        const initialPostsData = [
-            { type: 'image', mediaSrc: 'p1.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "this is the first picture of you that I took, for the 1st time, *disini belum omel-omel kalau aku merokok, tapi sekarang sudah seperti singa kalau aku merokok..", comments: [] },
-            { type: 'image', mediaSrc: 'p2.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "then this my favorite one from all of the picture of you that I took, you look so adorable, cute, pretty, goddamn precious", comments: [] },
-            { type: 'video', mediaSrc: 'p3.mp4', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "ini video dan bukti bahwa yang suka peluk-peluk itu kamu HAHAHA", comments: [] },
+        /* * === BAGIAN DATA POSTINGAN YANG DIPERBARUI ===
+         * FIX: Komentar sekarang menjadi bagian dari data awal.
+         * Fungsi 'localStorage' dihapus agar komentar terlihat oleh semua orang
+         * yang membuka file HTML ini.
+        */
+        const postsData = [
+            { type: 'image', mediaSrc: 'p1.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "this is the first picture of you that I took, for the 1st time, *disini belum omel-omel kalau aku merokok, tapi sekarang sudah seperti singa kalau aku merokok..", comments: [{user: 'sehun2ndwife', text: 'kamu ngerokok terus sih!!'}] },
+            { type: 'image', mediaSrc: 'p2.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "then this my favorite one from all of the picture of you that I took, you look so adorable, cute, pretty, goddamn precious", comments: [{user: 'sehun2ndwife', text: 'aww, thank you, sayang!'}] },
+            { type: 'video', mediaSrc: 'p3.mp4', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "ini video dan bukti bahwa yang suka peluk-peluk itu kamu HAHAHA", comments: [{user: 'sehun2ndwife', text: 'ENAK AJA! kamu duluan ih'}] },
             { type: 'image', mediaSrc: 'p4.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "nah kalau ini our first photo strangers took for us, I look so fuckin freeze??? don't know how to pose??? *cool guy problem..", comments: [] },
-            { type: 'image', mediaSrc: 'p5.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "kalau ini senyum pepsodent, then on this photo you're finally realize that we have matching face lmaooo, *selama ini denial jir", comments: [] },
-            { type: 'image', mediaSrc: 'pfp.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "this the last one n our cutest selfie since the day one, we look so fine, cute, and like we've never had conflict, *in fact kita banyak berantem anjayy mabar", comments: [] }
+            { type: 'image', mediaSrc: 'p5.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "kalau ini senyum pepsodent, then on this photo you're finally realize that we have matching face lmaooo, *selama ini denial jir", comments: [{user: 'sehun2ndwife', text: 'ternyata kita mirip ya...'}] },
+            { type: 'image', mediaSrc: 'pfp.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "this the last one n our cutest selfie since the day one, we look so fine, cute, and like we've never had conflict, *in fact kita banyak berantem anjayy mabar", comments: [{user: 'sehun2ndwife', text: 'berantem anjay mabar HAHAHA'}] }
         ];
 
-        const loadPostsData = () => {
-            const savedData = localStorage.getItem('myInstaPostsData');
-            if (savedData) {
-                // Saat me-load, kita pastikan caption & data dasar tetap terbaru, tapi komentar tetap dari data simpanan
-                const savedPosts = JSON.parse(savedData);
-                return initialPostsData.map((initialPost, index) => ({
-                    ...initialPost,
-                    comments: savedPosts[index] ? savedPosts[index].comments : []
-                }));
-            } else {
-                return initialPostsData;
-            }
-        };
-
-        const savePostsData = (data) => {
-            localStorage.setItem('myInstaPostsData', JSON.stringify(data));
-        };
-
-        let postsData = loadPostsData();
-        // Simpan data awal jika belum ada di localStorage, untuk memastikan caption terbaru tersimpan
-        if (!localStorage.getItem('myInstaPostsData')) {
-            savePostsData(postsData);
-        }
+        // FIX: The logic for saving/loading from localStorage has been removed.
 
         const modal = document.getElementById('modal');
         const postItems = document.querySelectorAll('.post-item');
@@ -415,15 +410,14 @@
             captionElement.innerHTML = `<div class="comment-text"><strong>${post.user}</strong> <span>${post.caption}</span></div>`;
             modalCommentsContainer.appendChild(captionElement);
 
-            post.comments.forEach((commentText, index) => {
+            post.comments.forEach((comment, index) => {
                 const commentElement = document.createElement('div');
                 commentElement.classList.add('comment');
                 commentElement.innerHTML = `
                     <div class="comment-text">
-                        <strong>sehun2ndwife</strong> <span>${commentText}</span>
+                        <strong>${comment.user}</strong> <span>${comment.text}</span>
                     </div>
-                    <button class="delete-comment-btn" data-comment-index="${index}">&times;</button>
-                `;
+                    `;
                 modalCommentsContainer.appendChild(commentElement);
             });
         }
@@ -466,21 +460,15 @@
             const commentText = commentInput.value.trim();
 
             if (commentText !== '' && currentPostIndex !== null) {
-                postsData[currentPostIndex].comments.push(commentText);
-                savePostsData(postsData);
+                // NOTE: This will only add the comment for the current session.
+                // It will disappear on page reload because we removed localStorage.
+                const newComment = { user: 'sehun2ndwife', text: commentText };
+                postsData[currentPostIndex].comments.push(newComment);
                 renderComments(postsData[currentPostIndex]);
                 commentInput.value = '';
             }
         };
         
-        const deleteComment = (commentIndex) => {
-            if (currentPostIndex !== null) {
-                postsData[currentPostIndex].comments.splice(commentIndex, 1);
-                savePostsData(postsData);
-                renderComments(postsData[currentPostIndex]);
-            }
-        };
-
         // Event Listeners
         postItems.forEach(post => {
             post.addEventListener('click', () => {
@@ -491,12 +479,8 @@
         
         commentForm.addEventListener('submit', addComment);
 
-        modalCommentsContainer.addEventListener('click', function(event) {
-            if (event.target.classList.contains('delete-comment-btn')) {
-                const commentIndex = parseInt(event.target.dataset.commentIndex, 10);
-                deleteComment(commentIndex);
-            }
-        });
+        // Note: Delete functionality is visually removed as it won't be persistent.
+        // If you need it, the original logic can be added back but will only work for the current session.
 
         modalCloseButton.addEventListener('click', closeModal);
         modal.addEventListener('click', (e) => {
