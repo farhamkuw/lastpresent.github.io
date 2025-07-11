@@ -142,7 +142,6 @@
             display: flex;
             flex-direction: column;
             padding: 20px;
-            /* FIX: Ensure the container can shrink if content overflows */
             min-height: 0;
         }
         .modal-header {
@@ -178,6 +177,8 @@
         }
         .comment-text {
             flex-grow: 1;
+            padding-right: 10px;
+            word-break: break-word;
         }
         .comment strong {
             margin-right: 5px;
@@ -187,12 +188,13 @@
             border: none;
             color: #999;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 20px;
             padding: 0 5px;
-            display: none;
+            opacity: 0; /* Initially hidden */
+            transition: opacity 0.2s;
         }
         .comment:hover .delete-comment-btn {
-            display: inline;
+            opacity: 1; /* Muncul saat di-hover */
         }
         .modal-actions {
             padding-top: 10px;
@@ -264,7 +266,6 @@
                 margin: 0 15px;
             }
             .post-grid {
-                display: grid;
                 grid-template-columns: 1fr;
                 gap: 5px; 
                 margin: 20px 0;
@@ -274,16 +275,15 @@
                 width: 95%;
                 height: 90vh;
             }
-            
-            /* === PERBAIKAN DI SINI === */
+            /* KUNCI UNTUK TAMPILAN MOBILE YANG BENAR */
             .modal-media {
-                flex: 1; /* Biarkan media mengambil ruang yang fleksibel */
-                min-height: 0; /* Penting agar item flex bisa menyusut */
+                flex: 1;
+                min-height: 0;
             }
             .modal-info {
-                flex: 1; /* Biarkan info mengambil ruang yang fleksibel */
-                min-height: 0; /* Penting agar item flex bisa menyusut */
-                padding: 10px; /* Sesuaikan padding untuk layar kecil */
+                flex: 1;
+                min-height: 0;
+                padding: 10px;
             }
         }
     </style>
@@ -308,30 +308,12 @@
     </header>
 
     <main class="post-grid">
-        <div class="post-item" data-index="0">
-            <img src="p1.jpg" alt="Postingan 1">
-            <div class="post-overlay"><div class="post-stats"><span>❤️ fthrfz, sehun2ndwife</span></div></div>
-        </div>
-        <div class="post-item" data-index="1">
-            <img src="p2.jpg" alt="Postingan 2">
-            <div class="post-overlay"><div class="post-stats"><span>❤️ fthrfz, sehun2ndwife</span></div></div>
-        </div>
-        <div class="post-item" data-index="2">
-            <img src="thumbnail_video.jpg" alt="Postingan 3">
-            <div class="post-overlay"><div class="post-stats"><span>▶️ 1212</span></div></div>
-        </div>
-        <div class="post-item" data-index="3">
-            <img src="p4.jpg" alt="Postingan 4">
-            <div class="post-overlay"><div class="post-stats"><span>❤️ fthrfz, sehun2ndwife</span></div></div>
-        </div>
-        <div class="post-item" data-index="4">
-            <img src="p5.jpg" alt="Postingan 5">
-            <div class="post-overlay"><div class="post-stats"><span>❤️ fthrfz, sehun2ndwife</span></div></div>
-        </div>
-        <div class="post-item" data-index="5">
-            <img src="pfp.jpg" alt="Postingan 6">
-            <div class="post-overlay"><div class="post-stats"><span>❤️ fthrfz, sehun2ndwife</span></div></div>
-        </div>
+        <div class="post-item" data-index="0"><img src="p1.jpg" alt="Postingan 1"><div class="post-overlay"><div class="post-stats"><span>❤️ fthrfz, sehun2ndwife</span></div></div></div>
+        <div class="post-item" data-index="1"><img src="p2.jpg" alt="Postingan 2"><div class="post-overlay"><div class="post-stats"><span>❤️ fthrfz, sehun2ndwife</span></div></div></div>
+        <div class="post-item" data-index="2"><img src="thumbnail_video.jpg" alt="Postingan 3"><div class="post-overlay"><div class="post-stats"><span>▶️ 1212</span></div></div></div>
+        <div class="post-item" data-index="3"><img src="p4.jpg" alt="Postingan 4"><div class="post-overlay"><div class="post-stats"><span>❤️ fthrfz, sehun2ndwife</span></div></div></div>
+        <div class="post-item" data-index="4"><img src="p5.jpg" alt="Postingan 5"><div class="post-overlay"><div class="post-stats"><span>❤️ fthrfz, sehun2ndwife</span></div></div></div>
+        <div class="post-item" data-index="5"><img src="pfp.jpg" alt="Postingan 6"><div class="post-overlay"><div class="post-stats"><span>❤️ fthrfz, sehun2ndwife</span></div></div></div>
     </main>
     
     <div id="modal" class="modal-overlay">
@@ -345,11 +327,7 @@
                 </div>
                 <div id="modal-comments-container" class="modal-comments"></div>
                 <div class="modal-actions">
-                    <div class="action-icons">
-                        <span>❤️</span>
-                        <span>💬</span>
-                        <span>➢</span>
-                    </div>
+                    <div class="action-icons"><span>❤️</span><span>💬</span><span>➢</span></div>
                     <div id="modal-like-count" class="like-count"></div>
                     <form id="comment-form" class="comment-form">
                         <input type="text" id="comment-input" placeholder="Tambahkan komentar..." autocomplete="off">
@@ -363,7 +341,7 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-        /* === BAGIAN CAPTION YANG DIPERBARUI SESUAI PERMINTAAN ANDA === */
+        // 1. CAPTION TETAP, TAPI KOMENTAR DIMULAI DARI KOSONG
         const initialPostsData = [
             { type: 'image', mediaSrc: 'p1.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "this is the first picture of you that I took, for the 1st time, *disini belum omel-omel kalau aku merokok, tapi sekarang sudah seperti singa kalau aku merokok..", comments: [] },
             { type: 'image', mediaSrc: 'p2.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "then this my favorite one from all of the picture of you that I took, you look so adorable, cute, pretty, goddamn precious", comments: [] },
@@ -372,30 +350,26 @@
             { type: 'image', mediaSrc: 'p5.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "kalau ini senyum pepsodent, then on this photo you're finally realize that we have matching face lmaooo, *selama ini denial jir", comments: [] },
             { type: 'image', mediaSrc: 'pfp.jpg', user: 'journeyofus', likes: ['fthrfz', 'sehun2ndwife'], caption: "this the last one n our cutest selfie since the day one, we look so fine, cute, and like we've never had conflict, *in fact kita banyak berantem anjayy mabar", comments: [] }
         ];
+        
+        const storageKey = 'myInstaPostsData_Final'; // Kunci penyimpanan di browser
 
+        // 2. FUNGSI UNTUK MENYIMPAN DATA KE BROWSER
+        const savePostsData = (data) => {
+            localStorage.setItem(storageKey, JSON.stringify(data));
+        };
+
+        // 3. FUNGSI UNTUK MEMUAT DATA DARI BROWSER
         const loadPostsData = () => {
-            const savedData = localStorage.getItem('myInstaPostsData');
+            const savedData = localStorage.getItem(storageKey);
             if (savedData) {
-                // Saat me-load, kita pastikan caption & data dasar tetap terbaru, tapi komentar tetap dari data simpanan
-                const savedPosts = JSON.parse(savedData);
-                return initialPostsData.map((initialPost, index) => ({
-                    ...initialPost,
-                    comments: savedPosts[index] ? savedPosts[index].comments : []
-                }));
+                return JSON.parse(savedData);
             } else {
+                // Jika tidak ada data tersimpan, gunakan data awal (dengan komen kosong)
                 return initialPostsData;
             }
         };
-
-        const savePostsData = (data) => {
-            localStorage.setItem('myInstaPostsData', JSON.stringify(data));
-        };
-
+        
         let postsData = loadPostsData();
-        // Simpan data awal jika belum ada di localStorage, untuk memastikan caption terbaru tersimpan
-        if (!localStorage.getItem('myInstaPostsData')) {
-            savePostsData(postsData);
-        }
 
         const modal = document.getElementById('modal');
         const postItems = document.querySelectorAll('.post-item');
@@ -409,11 +383,7 @@
         const commentForm = document.getElementById('comment-form');
         const commentInput = document.getElementById('comment-input');
         
-        const formatLikes = (post) => {
-            const likeCount = post.likes.length;
-            if (likeCount === 0) return '0 likes';
-            return `Disukai oleh <strong>${post.likes[0]}</strong> dan <strong>${post.likes[1]}</strong>`;
-        };
+        const formatLikes = (post) => `Disukai oleh <strong>${post.likes[0]}</strong> dan <strong>${post.likes[1]}</strong>`;
         
         const renderComments = (post) => {
             modalCommentsContainer.innerHTML = ''; 
@@ -474,7 +444,7 @@
 
             if (commentText !== '' && currentPostIndex !== null) {
                 postsData[currentPostIndex].comments.push(commentText);
-                savePostsData(postsData);
+                savePostsData(postsData); // SIMPAN ke browser setelah menambah komen
                 renderComments(postsData[currentPostIndex]);
                 commentInput.value = '';
             }
@@ -483,7 +453,7 @@
         const deleteComment = (commentIndex) => {
             if (currentPostIndex !== null) {
                 postsData[currentPostIndex].comments.splice(commentIndex, 1);
-                savePostsData(postsData);
+                savePostsData(postsData); // SIMPAN ke browser setelah menghapus komen
                 renderComments(postsData[currentPostIndex]);
             }
         };
@@ -491,8 +461,7 @@
         // Event Listeners
         postItems.forEach(post => {
             post.addEventListener('click', () => {
-                const index = parseInt(post.dataset.index, 10);
-                openModal(index);
+                openModal(parseInt(post.dataset.index, 10));
             });
         });
         
@@ -506,16 +475,8 @@
         });
 
         modalCloseButton.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && modal.style.display === 'flex') {
-                closeModal();
-            }
-        });
+        modal.addEventListener('click', (e) => (e.target === modal) && closeModal());
+        window.addEventListener('keydown', (e) => (e.key === 'Escape') && closeModal());
     });
     </script>
 </body>
